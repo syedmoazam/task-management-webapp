@@ -50,7 +50,7 @@ export default function ToDos() {
   };
 
   const addToDo = async (title, category, uid) => {
-    let date = new Date();
+    let date = new Date("3-29-2022");
     let week = moment(
       `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`,
       "MM-DD-YYYY"
@@ -87,6 +87,17 @@ export default function ToDos() {
   };
   
   const obj = useSelector((state) => state.tasks);
+  let timerState = [];
+  if(obj && obj.progress){
+    timerState = totalTasks(obj.progress).map(item=>{
+      return {
+        id: item.id,
+        timer: false,
+        duration: 0,
+      }
+    })
+  }
+  console.log(timerState)
   return (
     <>
       <div className="container-fluid g-0">

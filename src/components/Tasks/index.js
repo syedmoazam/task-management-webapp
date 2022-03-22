@@ -14,11 +14,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
+import { BsXCircle, BsPlayFill, BsPauseFill } from "react-icons/bs";
 import { FiMoreHorizontal, FiEdit2 } from "react-icons/fi";
 import { BiTask, BiCategoryAlt } from "react-icons/bi";
 import { TiTickOutline } from "react-icons/ti";
 import { CgSandClock } from "react-icons/cg";
-import { BsXCircle, BsPlayFill } from "react-icons/bs";
 import { FiDelete } from "react-icons/fi";
 import Avatar from "react-avatar";
 
@@ -157,8 +157,6 @@ export default function Tasks({ taskType, id, task, week, day }) {
     }
     return () => clearInterval(interval);
   }, [timeOn]);
-
-  console.log(task);
 
   return (
     <>

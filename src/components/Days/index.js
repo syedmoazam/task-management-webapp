@@ -16,7 +16,8 @@ export default function Days({ taskType, day, tasks, week }) {
   ];
   useEffect(() => {
     showDays(false);
-  }, [taskType]);
+  }, []);
+
   return (
     <div className="row day">
       <div className=" justify-content-between d-flex align-items-center ">
