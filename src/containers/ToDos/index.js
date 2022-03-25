@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,28 +22,23 @@ import {
   Area,
 } from "recharts";
 
+import { getToDos, timerStart, timerStop, weather } from "@store/Actions";
+import { Button, Menu, Spinner, ToDoList } from "@components";
+import { db, ref, set, push, auth, signOut } from "@config";
+import { totalTasks, graphTasks } from "@helpers";
 
-import { Button, Menu, Spinner, ToDoList } from "../../components";
-import { db, ref, set, push, auth, signOut } from "../../config";
-import { getToDos } from "../../store/Actions";
-import { totalTasks } from "../../helpers";
 import "./style.css";
 
 export default function ToDos() {
-
   const moment = require("moment");
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const {uid} = useParams();
+  const { uid } = useParams();
 
   const { register, handleSubmit, formState, reset } = useForm();
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("progress");
   const [modal, setModal] = useState(false);
-
-  useEffect(() => {
-    dispatch(getToDos(uid));
-  }, []);
 
   const openModal = () => {
     reset();
@@ -50,31 +46,25 @@ export default function ToDos() {
   };
 
   const addToDo = async (title, category, uid) => {
-    let date = new Date("3-29-2022");
+    let date = new Date();
     let week = moment(
       `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`,
       "MM-DD-YYYY"
     ).week();
-
     const value = {
       title,
       category,
       date: `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`,
     };
-
     setLoading(true);
-    
     const postListRef = ref(
       db,
       `todos/${uid}/backlog/${week}/${date.getDay()}`
     );
-    
     const newPostRef = push(postListRef);
-
     await set(newPostRef, value)
       .then(() => dispatch(getToDos(uid)))
       .catch((err) => console.log("data transmission failed"));
-
     setLoading(false);
     setModal(false);
   };
@@ -85,19 +75,33 @@ export default function ToDos() {
       navigate("/login");
     });
   };
-  
+
+  const api = {
+    key: "4aac58918861d9442164e6d8ad379eb6",
+    base: "https://api.openweathermap.org/data/2.5/weather",
+  };
+
+  useEffect(() => {
+    dispatch(getToDos(uid));
+    dispatch(timerStop());
+    fetch(`${api.base}?q=karachi,PK&appid=${api.key}`)
+      .then((response) => response.json())
+      .then((json) => {
+        dispatch(weather(json.main));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  let timerState = useSelector((state) => state.timerState);
+  const weather = useSelector((state) => state.weather);
   const obj = useSelector((state) => state.tasks);
-  let timerState = [];
-  if(obj && obj.progress){
-    timerState = totalTasks(obj.progress).map(item=>{
-      return {
-        id: item.id,
-        timer: false,
-        duration: 0,
-      }
-    })
+  let graphData = null;
+  if (obj && obj.done) {
+    graphData = graphTasks(totalTasks(obj.done));
   }
-  console.log(timerState)
+
   return (
     <>
       <div className="container-fluid g-0">
@@ -131,7 +135,9 @@ export default function ToDos() {
                   <span
                     className={tab == "backlog" ? "active-tab" : ""}
                     onClick={() => {
-                      setTab("backlog");
+                      if (!timerState.status) {
+                        setTab("backlog");
+                      }
                     }}
                   >
                     Backlog(
@@ -141,7 +147,9 @@ export default function ToDos() {
                   <span
                     className={tab == "progress" ? "active-tab" : ""}
                     onClick={() => {
-                      setTab("progress");
+                      if (!timerState.status) {
+                        setTab("progress");
+                      }
                     }}
                   >
                     Progress(
@@ -153,7 +161,9 @@ export default function ToDos() {
                   <span
                     className={tab == "done" ? "active-tab" : ""}
                     onClick={() => {
-                      setTab("done");
+                      if (!timerState.status) {
+                        setTab("done");
+                      }
                     }}
                   >
                     Done({obj && obj?.done ? totalTasks(obj.done).length : "0"})
@@ -231,7 +241,7 @@ export default function ToDos() {
                     <AreaChart
                       width={500}
                       height={400}
-                      data={obj && obj?.tab && totalTasks(obj.progress)}
+                      data={graphData}
                       margin={{
                         top: 10,
                         right: 30,
@@ -240,12 +250,12 @@ export default function ToDos() {
                       }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="title" />
+                      <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
                       <Area
                         type="monotone"
-                        dataKey="date"
+                        dataKey="uv"
                         stroke="#8884d8"
                         fill="#8884d8"
                       />

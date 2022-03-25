@@ -1,23 +1,31 @@
+import { useState } from "react";
+
 import { useSelector, useDispatch } from "react-redux";
 import { MdOutlineLock } from "react-icons/md";
 import { AiOutlineMail } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
-
-import { Logos, Content, Sidebar, Button, Spinner } from "../../components";
-import { db, auth, signInWithEmailAndPassword } from "../../config";
-import { authUserToStore } from "../../store/Actions";
-import AuthLayout from "../../components/Layout/AuthLayout";
-import "./style.css";
 import { Alert } from "reactstrap";
+
+import { auth, signInWithEmailAndPassword } from "@config";
+
+import AuthLayout from "@components/Layout/AuthLayout";
+import { Button, Spinner } from "@components";
+
+import { authUserToStore } from "@store/Actions";
+
+import "./style.css";
+
 export default function Login() {
-  const dispatch = useDispatch();
-  let navigate = useNavigate();
-  const { register, handleSubmit, formState } = useForm();
-  const [loading, setLoading] = useState(false);
-  const [formFail, setFormFail] = useState(false);
   let user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
+  const { register, handleSubmit, formState } = useForm();
+  const [formFail, setFormFail] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const signIn = async (email, password) => {
     setLoading(true);
     await signInWithEmailAndPassword(auth, email, password)
@@ -33,6 +41,7 @@ export default function Login() {
       });
     setLoading(false);
   };
+  
   const closeAlert = () => setFormFail(!formFail);
   return (
     <AuthLayout

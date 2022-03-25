@@ -22,7 +22,7 @@ import { CgSandClock } from "react-icons/cg";
 import { FiDelete } from "react-icons/fi";
 import Avatar from "react-avatar";
 
-import { getToDos } from "../../store/Actions";
+import { getToDos, timerStart, timerStop } from "../../store/Actions";
 import { set, ref, db, remove } from "../../config";
 import Spinner from "../Spinner";
 import Button from "../Button";
@@ -125,8 +125,19 @@ export default function Tasks({ taskType, id, task, week, day }) {
       case "progress":
         return (
           <>
-            <Button onClick={()=>setTimeOn(prevTime => !prevTime)} style="progress-btn">
-              <BsPlayFill fontSize={32} color="#57df7d" />
+            <Button
+              onClick={() => {
+                setTimeOn((prevTime) => !prevTime);
+              }}
+              style="progress-btn"
+            >
+              {!timerState.status ? (
+                <BsPlayFill fontSize={32} color="#57df7d" />
+              ) : (
+                timerState.id == task.id && (
+                  <BsPauseFill fontSize={32} color="#eb3941" />
+                )
+              )}
             </Button>
             <span>
               {("0" + Math.floor((time / (1000 * 60 * 60)) % 24)).slice(-2)}:
@@ -142,17 +153,22 @@ export default function Tasks({ taskType, id, task, week, day }) {
     }
   };
 
+  let timerState = useSelector((state) => state.timerState);
   useEffect(() => {
     setTime(task.time);
   }, []);
 
   useEffect(() => {
     let interval = null;
-    if (timeOn) {
+    if (timeOn && !timerState.status) {
+      dispatch(timerStart(task.id));
       interval = setInterval(() => {
         setTime((prevTime) => prevTime + 1000);
       }, 1000);
     } else {
+      if (timerState.id == task.id) {
+        dispatch(timerStop());
+      }
       clearInterval(interval);
     }
     return () => clearInterval(interval);

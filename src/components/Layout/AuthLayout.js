@@ -1,5 +1,5 @@
 
-import { Logos, Content, Sidebar } from "../../components";
+import { Logos, Content, Sidebar } from "@components";
 import './style.css';
 
 export default function AuthLayout({children, sideTitle, sideText, sideBtnText, sideBtnURL, heading, subText}) {

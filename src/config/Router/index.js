@@ -1,36 +1,35 @@
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   BrowserRouter,
+  Navigate,
   Routes,
   Route,
-  useLocation,
-  Navigate,
-  useNavigate,
 } from "react-router-dom";
-import { Login, Signup, ToDos } from "../../containers";
-import { useSelector, useDispatch } from "react-redux";
-import { auth, onAuthStateChanged } from "../Firebase";
-import { useEffect, useMemo, useState } from "react";
-import { authUserToStore } from "../../store/Actions";
+
+import { auth, onAuthStateChanged } from "@config/Firebase";
+import { Login, Signup, ToDos } from "@containers";
+import { authUserToStore } from "@store/Actions";
 
 export default function AppRouter() {
   const dispatch = useDispatch();
-  const [user,setUser] = useState('');
+
   const [logged, setLogged] = useState(false);
-  console.log("app router");
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+  const [user, setUser] = useState("");
+
+  useEffect(async () => {
+    await onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log(user);
         dispatch(authUserToStore(user.uid));
         setUser(user.uid);
         setLogged(true);
-      }
-      else{
-        setUser('');
+      } else {
+        setUser("");
         setLogged(false);
       }
     });
   }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -62,10 +61,8 @@ export default function AppRouter() {
     </BrowserRouter>
   );
 }
+
 function RequireAuth({ children, logged }) {
-  const location = useLocation();
-  console.log("private Route");
-  // const state = useSelector(state=>state);
   if (!logged) {
     return <Navigate to="/login" replace />;
   }
@@ -73,12 +70,8 @@ function RequireAuth({ children, logged }) {
 }
 
 function RequireAuthPublic({ children, logged, user }) {
-  const location = useLocation();
-  // let state = useSelector((state) => state);
   if (logged) {
-    return (
-      <Navigate to={`/todos/${user}`} replace />
-    );
+    return <Navigate to={`/todos/${user}`} replace />;
   }
   return children;
 }

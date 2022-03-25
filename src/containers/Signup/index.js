@@ -1,27 +1,29 @@
-import { MdOutlineLock } from "react-icons/md";
-import { AiOutlineMail, AiOutlineUser } from "react-icons/ai";
-import { Logos, TextField, Content, Sidebar, Button } from "../../components";
-import "./style.css";
 import { useState } from "react";
+
+import { AiOutlineMail, AiOutlineUser } from "react-icons/ai";
+import { MdOutlineLock } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+
 import {
+  createUserWithEmailAndPassword,
   db,
   auth,
   set,
-  createUserWithEmailAndPassword,
   ref,
-} from "../../config";
-import { Spinner } from "../../components";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import AuthLayout from "../../components/Layout/AuthLayout";
+} from "@config";
+
+import AuthLayout from "@components/Layout/AuthLayout";
+import { Spinner } from "@components";
+
+import "./style.css";
 
 export default function Signup() {
   let navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  // const [name, setName] = useState('');
-  // const [email, setEmail] = useState('');
-  // const [password, setPassword] = useState('');
+
   const { register, handleSubmit, formState } = useForm();
+  const [loading, setLoading] = useState(false);
+  
   const registerUser = async (email, password, name) => {
     setLoading(true);
     await createUserWithEmailAndPassword(auth, email, password)
@@ -40,6 +42,7 @@ export default function Signup() {
       });
     setLoading(false);
   };
+  
   return (
     <AuthLayout
       sideTitle={"Welcome Back!"}
