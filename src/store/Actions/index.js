@@ -55,7 +55,7 @@ export const timerStart = (id) => {
   };
 };
 
-export const weather = (temp) => {
+export const weatherToStore = (temp) => {
   return {
     type: "WEATHER",
     payload: temp,

@@ -26,6 +26,12 @@
   margin-left: 12px;
 }
 
+.weather{
+  background-color: #5252c542;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
 .logout-btn {
   padding: 7px 20px;
   outline: none !important;
