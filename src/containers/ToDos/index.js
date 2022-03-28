@@ -22,7 +22,12 @@ import {
   Area,
 } from "recharts";
 
-import { getToDos, timerStart, timerStop, weather } from "@store/Actions";
+import {
+  getToDos,
+  timerStart,
+  timerStop,
+  weatherToStore,
+} from "@store/Actions";
 import { Button, Menu, Spinner, ToDoList } from "@components";
 import { db, ref, set, push, auth, signOut } from "@config";
 import { totalTasks, graphTasks } from "@helpers";
@@ -87,7 +92,7 @@ export default function ToDos() {
     fetch(`${api.base}?q=karachi,PK&appid=${api.key}`)
       .then((response) => response.json())
       .then((json) => {
-        dispatch(weather(json.main));
+        dispatch(weatherToStore(json.main));
       })
       .catch((err) => {
         console.log(err);
@@ -124,7 +129,13 @@ export default function ToDos() {
                     <AiOutlineSearch color="#adadad" fontSize="24px" />
                   </div>
                 </div>
-                <div className="d-flex justify-content-end col-6">
+                <div className="d-flex align-items-center justify-content-end col-6">
+                  {weather && (
+                    <div className="mx-3 text-light weather">
+                      {Math.floor(weather.temp - 273.15)}
+                      <sup>o</sup>C
+                    </div>
+                  )}
                   <Button style={"logout-btn"} onClick={logout}>
                     Logout
                   </Button>
@@ -133,7 +144,7 @@ export default function ToDos() {
               <div className="d-flex justify-content-between mx-5 mt-4 header">
                 <div>
                   <span
-                    className={tab == "backlog" ? "active-tab" : ""}
+                    className={tab === "backlog" ? "active-tab" : ""}
                     onClick={() => {
                       if (!timerState.status) {
                         setTab("backlog");
@@ -145,7 +156,7 @@ export default function ToDos() {
                     )
                   </span>
                   <span
-                    className={tab == "progress" ? "active-tab" : ""}
+                    className={tab === "progress" ? "active-tab" : ""}
                     onClick={() => {
                       if (!timerState.status) {
                         setTab("progress");
@@ -159,7 +170,7 @@ export default function ToDos() {
                     )
                   </span>
                   <span
-                    className={tab == "done" ? "active-tab" : ""}
+                    className={tab === "done" ? "active-tab" : ""}
                     onClick={() => {
                       if (!timerState.status) {
                         setTab("done");
@@ -194,7 +205,7 @@ export default function ToDos() {
                       <div className="d-flex">
                         <div className="m-0 g-0 p-0">
                           {obj && obj !== "No tasks found"
-                            ? tab == "backlog" && obj.hasOwnProperty("backlog")
+                            ? tab === "backlog" && obj.hasOwnProperty("backlog")
                               ? Object.entries(obj.backlog).map((item, key) => (
                                   <ToDoList
                                     taskType={tab}
@@ -203,7 +214,7 @@ export default function ToDos() {
                                     days={item[1]}
                                   />
                                 ))
-                              : tab == "progress" &&
+                              : tab === "progress" &&
                                 obj.hasOwnProperty("progress")
                               ? Object.entries(obj.progress).map(
                                   (item, key) => (
@@ -215,7 +226,7 @@ export default function ToDos() {
                                     />
                                   )
                                 )
-                              : tab == "done" && obj?.done
+                              : tab === "done" && obj?.done
                               ? Object.entries(obj.done).map((item, key) => (
                                   <ToDoList
                                     taskType={tab}

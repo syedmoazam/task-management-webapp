@@ -44,6 +44,7 @@ export default function Tasks({ taskType, id, task, week, day }) {
   const [done, setDone] = useState(false);
   const [del, setDel] = useState(false);
   const [time, setTime] = useState(0);
+  const [timerIntervalId, setTimerIntervalId] = useState(null);
 
   const dispatch = useDispatch();
   const params = useParams();
@@ -89,7 +90,7 @@ export default function Tasks({ taskType, id, task, week, day }) {
 
   const addToDo = (assignmentType, title, category, setModal) => {
     setLoading(true);
-    saveToDo(assignmentType, title, category);
+    saveToDo(assignmentType, title, category, time);
     setLoading(false);
     reset();
     setModal(false);
@@ -110,12 +111,12 @@ export default function Tasks({ taskType, id, task, week, day }) {
     time
   ) => {
     setLoading(true);
-    saveToDo(assignmentType, title, category, time);
+    saveToDo(assignmentType, title, category);
     removeToDo(oldAssignment);
     setLoading(false);
-    if (assignmentType == "progress") {
+    if (assignmentType === "progress") {
       openProgress();
-    } else if (assignmentType == "done") {
+    } else if (assignmentType === "done") {
       openDone();
     }
   };
@@ -131,12 +132,10 @@ export default function Tasks({ taskType, id, task, week, day }) {
               }}
               style="progress-btn"
             >
-              {!timerState.status ? (
+              {!timeOn ? (
                 <BsPlayFill fontSize={32} color="#57df7d" />
               ) : (
-                timerState.id == task.id && (
-                  <BsPauseFill fontSize={32} color="#eb3941" />
-                )
+                <BsPauseFill fontSize={32} color="#eb3941" />
               )}
             </Button>
             <span>
@@ -153,27 +152,37 @@ export default function Tasks({ taskType, id, task, week, day }) {
     }
   };
 
-  let timerState = useSelector((state) => state.timerState);
+  // let timerState = useSelector((state) => state.timerState);
   useEffect(() => {
     setTime(task.time);
   }, []);
 
   useEffect(() => {
-    let interval = null;
-    if (timeOn && !timerState.status) {
-      dispatch(timerStart(task.id));
-      interval = setInterval(() => {
+    // let interval = null;
+    if (timeOn) {
+      // dispatch(timerStart(task.id));
+      const interval = setInterval(() => {
         setTime((prevTime) => prevTime + 1000);
       }, 1000);
+      setTimerIntervalId(interval);
     } else {
-      if (timerState.id == task.id) {
-        dispatch(timerStop());
-      }
-      clearInterval(interval);
+      // if (timerState.id == task.id) {
+      //   dispatch(timerStop());
+      // }
+      clearInterval(timerIntervalId);
     }
-    return () => clearInterval(interval);
+    return () => {
+      console.log("TAB SWITCTED -- > ")
+      console.log("TAB SWITCTED -- > timerIntervalId", timerIntervalId)
+      clearInterval(timerIntervalId);
+    }
   }, [timeOn]);
-
+  
+  console.log("************************************", );
+  console.log("TASKS STAETE id", id);
+  console.log("TASKS STAETE timeOn", timeOn);
+  console.log("TASKS STAETE timerIntervalId", timerIntervalId);
+  console.log("************************************", );
   return (
     <>
       <div className="row mx-2 task">
